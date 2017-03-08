@@ -1,0 +1,45 @@
+/**
+* Created by zeqi
+* @module interface-->{{&moduleName}}
+* @auto-gen
+* Note: auto-gen code, NOT allowed to modify
+*/
+
+'use strict'
+
+var grpc = require('grpc');
+var api = require('../../api/{{&moduleName}}');
+
+var PROTO_PATH = __dirname + '/../../../../protos/{{&moduleName}}.proto';
+var proto = grpc.load(PROTO_PATH).node_mongo;
+
+var BaseInterface = require('../base');
+
+class Interface extends BaseInterface {
+    constructor() {
+        super(proto, api)
+    }
+
+    getInterface() {
+        var self = this;
+        {{#schema_statics}}
+        self.interfaceDic.{{&name}} = self.api.{{&name}};
+        {{/schema_statics}}
+        {{#schena_methods}}
+        self.interfaceDic.{{&name}} = self.api.{{&name}};
+        {{/schena_methods}}
+
+        self.interfaceDic.api = self.api;
+        self.interfaceDic.business = self.api.business;
+        self.interfaceDic.normalize = self.api.normalize;
+        self.interfaceDic.res = self.api.res;
+        self.interfaceDic.resCode = self.api.resCode;
+
+        return self.interfaceDic;
+    }
+
+    getService() {
+        return this.proto.{{&serviceName}}.service;
+    }
+}
+module.exports = new Interface();

@@ -1,0 +1,47 @@
+/**
+* Created by zeqi
+* @module api-->{{&moduleName}}
+* @auto-gen
+* Note: auto-gen code, NOT allowed to modify
+*/
+
+'use strict'
+
+var BaseApi = require('../base');
+var business = require('../../business/{{&moduleName}}');
+
+var normalize = require('../../utils/normalize');
+var res = require('../../utils/res');
+var resCode = require('../../define/resCode');
+
+class Api extends BaseApi {
+    constructor() {
+        super(business,normalize,res,resCode);
+    }
+
+    {{#schema_statics}}
+        {{&name}}(req, callback) {
+            var self = this;
+            var request = req.request;
+            return self.business.{{&name}}({{#conditionParams}}{{#isparam}}request.{{&name}}{{#comma}},{{/comma}}{{/isparam}}{{/conditionParams}}).then(function (data) {
+                return callback(null, new self.res.OK(self.normalize(data)));
+            }).fail(function (err) {
+                return callback(null, new self.res.Error(self.resCode.res201, err.message));
+            });
+        }
+    {{/schema_statics}}
+
+    {{#schena_methods}}
+        {{&name}}(req, callback) {
+            var self = this;
+            var request = req.request;
+            return self.business.{{&name}}({{#conditionParams}}{{#isparam}}request.{{&name}}{{#comma}},{{/comma}}{{/isparam}}{{/conditionParams}}).then(function (data) {
+                return callback(null, new self.res.OK(self.normalize(data)));
+            }).fail(function (err) {
+                return callback(null, new self.res.Error(self.resCode.res201, err.message));
+            });
+        }
+    {{/schena_methods}}
+}
+
+module.exports = new Api();

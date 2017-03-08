@@ -1,0 +1,12 @@
+node_modules/
+.DS_Store
+*.log
+*.pid
+logs
+*.swp
+typings/
+.tscache/
+dist/
+*.idea
+*.vscode
+persistence

@@ -1,0 +1,69 @@
+/**
+* Persistence dao for {{&modelName}}
+* {{&dao_desc}}
+* @module dao-->{{&moduleName}}
+* @auto-gen
+* Note: auto-gen code, NOT allowed to modify
+*/
+
+'use strict'
+
+var Q = require('q');
+
+var debug = require('debug')('zeqi.hprose:dao:{{&moduleName}}');
+var BaseDao = require('../../common/baseDao');
+var DaoError = BaseDao.DaoError;
+var Model = require('../models/{{&moduleName}}');
+var model = Model.model;
+var schema = Model.schema;
+
+/**
+* Mongodb data access portal of function
+*/
+class Dao extends BaseDao {
+    /**
+    * Dao Class constructor
+    */
+    constructor() {
+        super(model);
+    }
+
+    get NAME() {
+        return '{{&daoName}}';
+    }
+
+    {{#schema_statics}}
+        {{&name}}({{#conditionParams}}{{#isparam}}{{&name}},{{/isparam}}{{/conditionParams}} callback) {
+            this.method = '{{&name}}';
+            var self = this;
+            {{#conditionParams}}
+                {{#isparam}}
+                    if (!{{&name}}) {
+                        return Q.reject(self.paramError({{&name}})).nodeify(callback);
+                    }
+                {{/isparam}}
+            {{/conditionParams}}
+            var task = self.model.{{&name}}({{#conditionParams}}{{#isparam}}{{&name}},{{/isparam}}{{/conditionParams}} callback);
+            return self.execTask(task, callback, self.method).nodeify(callback);
+        }
+    {{/schema_statics}}
+
+    {{#schena_methods}}
+        {{&name}}({{#conditionParams}}{{#isparam}}{{&name}},{{/isparam}}{{/conditionParams}} callback) {
+            this.method = '{{&name}}';
+            var self = this;
+            {{#conditionParams}}
+                {{#isparam}}
+                    if (!{{&name}}) {
+                        return Q.reject(self.paramError({{&name}})).nodeify(callback);
+                    }
+                {{/isparam}}
+            {{/conditionParams}}
+            var dog = new self.model({ {{#conditionParams}}{{&name}}:{{&name}}{{#comma}},{{/comma}}{{/conditionParams}} });
+            var task = dog.{{&name}}(callback);
+            return self.execTask(task, callback, self.method).nodeify(callback);
+        }
+    {{/schena_methods}}
+}
+
+module.exports = new Dao();

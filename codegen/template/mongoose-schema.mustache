@@ -1,0 +1,52 @@
+/**
+* Persistence model for {{&modelName}}
+* {{&schema_desc}}
+* @module model-->{{&moduleName}}
+* @auto-gen
+* Note: auto-gen code, NOT allowed to modify
+*/
+
+var mongoose = require('mongoose');
+
+var Schema = new mongoose.Schema({
+
+    {{#schema}}
+        /**
+        * Property definition - {{&name}}
+        * {{&description}}
+        */
+        {{&name}}:{{&type}}{{#comma}},{{/comma}}
+
+    {{/schema}}
+}
+{{#collectionName}}
+    , { collection: '{{&collectionName}}'}
+{{/collectionName}}
+);
+
+{{#schema_statics}}
+/**
+* {{&description}}
+* @param cb <function>  call back
+* @returns {*|Query}
+*/
+Schema.statics.{{&name}} = function ( {{#conditionParams}}{{#isparam}}{{&name}},{{/isparam}}{{/conditionParams}}cb) {
+    return this.find({ {{#conditionParams}}{{#schenaValse}}{{&name}}:new RegExp({{&name}}, 'i'){{/schenaValse}} {{#defaultValue}}{{&name}}:'{{&defaultValue}}'{{/defaultValue}}{{#comma}},{{/comma}}{{/conditionParams}} }, cb);
+}
+{{/schema_statics}}
+
+{{#schena_methods}}
+/**
+* {{&description}}
+* @param cb <function>  call back
+* @returns {*|Query}
+*/
+Schema.methods.{{&name}} = function (cb) {
+    return this.model('user').find({ {{#conditionParams}}{{#defaultValue}} {{&name}}:'{{&defaultValue}}' {{/defaultValue}} {{#schenaValse}} {{&name}}:this.{{&name}} {{/schenaValse}}{{#comma}},{{/comma}}{{/conditionParams}} }, cb);
+}
+{{/schena_methods}}
+
+module.exports.schema = Schema;
+module.exports.model = function (domain) {
+    return mongoose.model(domain + '.' + '{{&moduleName}}', Schema);
+};

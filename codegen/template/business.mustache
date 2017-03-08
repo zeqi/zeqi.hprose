@@ -1,0 +1,31 @@
+/**
+* Created by zeqi
+* @module business-->{{&moduleName}}
+* @auto-gen
+* Note: auto-gen code, NOT allowed to modify
+*/
+
+'use strict'
+
+var BaseBusiness = require('../base');
+var dao = require('../../persistence/dao/{{&moduleName}}');
+
+class Business extends BaseBusiness {
+    constructor() {
+        super(dao);
+    }
+
+    {{#schema_statics}}
+        {{&name}}({{#conditionParams}}{{#isparam}}{{&name}},{{/isparam}}{{/conditionParams}} callback) {
+            return dao.{{&name}}({{#conditionParams}}{{#isparam}}{{&name}}{{#comma}},{{/comma}}{{/isparam}}{{/conditionParams}}).nodeify(callback);
+        }
+    {{/schema_statics}}
+
+    {{#schena_methods}}
+        {{&name}}({{#conditionParams}}{{#isparam}}{{&name}},{{/isparam}}{{/conditionParams}} callback) {
+            return dao.{{&name}}({{#conditionParams}}{{#isparam}}{{&name}}{{#comma}},{{/comma}}{{/isparam}}{{/conditionParams}}).nodeify(callback);;
+        }
+    {{/schena_methods}}
+}
+
+module.exports = new Business();
