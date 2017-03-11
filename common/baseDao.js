@@ -70,114 +70,128 @@ class Base {
         return new DaoError('Exec function ' + self.method + ' find invalid param:' + JSON.stringify(param), param)
     }
 
-    execTask(task, callback, methodName) {
+    execTask(task, callback) {
         var self = this;
-        if (!methodName) {
-            methodName = self.method;
-        }
-
+        var method = self.method || 'execTask';
         if (!task) {
             return Q.reject(self.taskError(task)).nodeify(callback);
         }
         return Q.Promise(function (resolve, reject) {
             task.exec(function (err, result) {
                 if (err) {
-                    error(methodName, 'Error:\n', err);
+                    error(method, '[error]', err);
                     return reject(err);
                 } else {
-                    debug(methodName, 'Result:\n', result);
+                    debug(method, '[result]', result);
                     return resolve(result);
                 }
             });
         }).nodeify(callback);
     }
 
-    findDefine(condition, pageIndex, pageSize, sort) {
-        var method = 'findDefine';
-        var self = this;
-        if (!condition) {
-            condition = {};
-        }
-        var task = self.model.find(condition);
-        if (validate.isNumber(pageIndex)) {
-            if (!validate.isNumber(pageSize)) {
-                pageSize = self.customPageSize;
-            }
-            var startLine = (pageIndex - 1) * pageSize
-            task.limit(pageSize).skip(startLine);
-        }
-        if (validate.isObject(sort)) {
-            task.sort(sort);
-        }
-
-        return task;
-    }
-
-    countDefine(condition) {
-        var method = 'countDefine';
-        var self = this;
-        if (!condition) {
-            condition = {};
-        }
-        var task = self.model.count(condition);
-        return task;
-    }
-
-    save(data, callback) {
-        if (Array.isArray(data)) {
-            return this.create(data, callback);
-        }
-        var self = this;
-        return Q.Promise(function (resolve, reject) {
-            var mod = new self.model(data);
-            mod.save(function (err, doc) {
-                if (err) {
-                    error(self.method, 'Error:\n', err);
-                    return reject(err);
-                } else {
-                    debug(self.method, 'Result:\n', doc);
-                    return resolve(doc);
-                }
-            });
-        }).nodeify(callback);
-    }
-
-    create(data, callback) {
+    create(docs, callback) {
         this.method = 'create';
         var self = this;
-        if (!Array.isArray(data)) {
-            data = [data];
+        if (!Array.isArray(docs)) {
+            docs = [docs];
         }
         return Q.Promise(function (resolve, reject) {
-            self.model.create(data, function (err, docs) {
+            self.model.create(docs, function (err, data) {
                 if (err) {
-                    error(self.method, 'Error:\n', err);
+                    error(self.method, '[error]', err);
                     return reject(err);
                 } else {
-                    debug(self.method, 'Result:\n', docs);
-                    return resolve(docs);
+                    debug(self.method, '[result]', data);
+                    return resolve(data);
                 }
             });
         }).nodeify(callback);
     }
 
-    find(condition, pageIndex, pageSize, sort, callback) {
-        this.method = 'find';
+    save(doc, callback) {
+        this.method = 'save';
         var self = this;
-        var task = self.findDefine(condition, pageIndex, pageSize, sort);
-        return self.execTask(task, callback, self.method).nodeify(callback);
+        if (Array.isArray(doc)) {
+            return this.create(doc, callback).nodeify(callback);
+        }
+        var self = this;
+        return Q.Promise(function (resolve, reject) {
+            var mod = new self.model(doc);
+            mod.save(function (err, data) {
+                if (err) {
+                    error(self.method, '[error]', err);
+                    return reject(err);
+                } else {
+                    debug(self.method, '[result]', data);
+                    return resolve(data);
+                }
+            });
+        }).nodeify(callback);
     }
 
-    findListAndCount(condition, pageIndex, pageSize, sort, callback) {
-        this.method = 'findListAndCount';
+    defineFind(filter, options) {
+        var method = 'defineFind';
+        var self = this;
+        if (!filter) {
+            filter = {};
+        }
+        if (!filter.condition) {
+            filter.condition = filter;
+        }
+        if (!options) {
+            options = {};
+        }
+        if (typeof options != 'object') {
+            options = {};
+        }
+        var task = self.model.find(filter.condition, options);
+        if (filter.sort) {
+            task.sort(filter.sort);
+        }
+        if (filter.skip) {
+            task.skip(filter.skip);
+        }
+        if (filter.limit) {
+            task.skip(filter.limit);
+        }
+        return task;
+    }
+
+    defineCount(filter, options) {
+        var method = 'defineCount';
+        var self = this;
+        if (!filter) {
+            filter = {};
+        }
+        if (!filter.condition) {
+            filter.condition = filter;
+        }
+        var task = self.model.count(filter.condition);
+        return task;
+    }
+
+    find(filter, options, callback) {
+        this.method = 'find';
+        var self = this;
+        return self.execTask(self.defineFind(filter, options), callback).nodeify(callback);
+    }
+
+    count(filter, options, callback) {
+        this.method = 'count';
+        var self = this;
+        return self.execTask(self.defineCount(filter), callback).nodeify(callback);
+    }
+
+    findDocsAndCount(filter, options, callback) {
+        this.method = 'findDocsAndCount';
         var self = this;
         if (!condition) {
             condition = {};
         }
 
         var promises = [];
-        promises.push(self.find(condition, pageIndex, pageSize, sort, callback));
-        promises.push(self.count(condition, callback));
+        promises.push(self.find(filter, options, callback));
+        promises.push(self.count(filter, options, callback));
 
         return Q.allSettled(promises).then(function (result) {
             if (result && result[0].state == 'fulfilled' && result[1].state == 'fulfilled') {
@@ -191,7 +205,7 @@ class Base {
                 count: 0
             }
         }).fail(function (err) {
-            error(self.method, 'Error:\n', err);
+            error(self.method, '[error]', err);
             return {
                 list: [],
                 count: 0
@@ -199,101 +213,135 @@ class Base {
         }).nodeify(callback);
     }
 
-    findAll(callback) {
-        this.method = 'findAll';
+    defineFindOne(filter, options) {
+        var method = 'defineFind';
         var self = this;
-        var task = self.model.find();
-        return self.execTask(task, callback).nodeify(callback);
-    }
-
-    findById(id, callback) {
-        this.method = 'findById';
-        var self = this;
-        if (!id) {
-            return Q.reject(self.paramError(id)).nodeify(callback);
+        if (!filter) {
+            filter = {};
         }
-        var task = self.model.findById(id);
-        return self.execTask(task, callback).nodeify(callback);
+        if (!filter.condition) {
+            filter.condition = filter;
+        }
+        if (!options) {
+            options = {};
+        }
+        if (typeof options != 'object') {
+            options = {};
+        }
+        var task = self.model.findOne(filter.condition, options);
+        if (filter.sort) {
+            task.sort(filter.sort);
+        }
+        if (filter.skip) {
+            task.skip(filter.skip);
+        }
+        if (filter.limit) {
+            task.skip(filter.limit);
+        }
+        return task;
     }
 
-    findOne(condition, callback) {
+    findOne(filter, options, callback) {
         this.method = 'findOne';
         var self = this;
-        if (!condition) {
-            condition = {};
+        return self.execTask(self.defineFindOne(filter, options), callback).nodeify(callback);
+    }
+
+    findById(id, options, callback) {
+        this.method = 'findById';
+        var self = this;
+        var task = self.model.findById(id, options);
+        return self.execTask(task, callback).nodeify(callback);
+    }
+
+    update(filter, update, options, callback) {
+        this.method = 'update';
+        var self = this;
+        if (!filter) {
+            filter = {};
         }
-        var task = self.model.findOne(condition);
+        if (!filter.condition) {
+            filter.condition = filter;
+        }
+        if (!options) {
+            options = {};
+        }
+        var task = self.model.update(filter.condition, update, options);
         return self.execTask(task, callback).nodeify(callback);
     }
 
     findByIdAndUpdate(id, update, options, callback) {
         this.method = 'findByIdAndUpdate';
         var self = this;
-        if (!id) {
-            return Q.reject(self.paramError(id)).nodeify(callback);
-        }
-        if (!update) {
-            return Q.reject(self.paramError(update)).nodeify(callback);
-        }
-
         var task = self.model.findByIdAndUpdate(id, update, options);
         return self.execTask(task, callback).nodeify(callback);
     }
 
-    count(condition, callback) {
-        this.method = 'count';
-        var self = this;
-        var task = self.countDefine(condition);
-        return self.execTask(task, callback, self.method).nodeify(callback);
-    }
-
-    update(condition, update, options, callback) {
-        this.method = 'update';
-        var self = this;
-
-        if (!condition) {
-            Q.reject(self.paramError(condition)).nodeify(callback);
-        }
-        if (!update) {
-            Q.reject(self.paramError(update)).nodeify(callback);
-        }
-        var task = self.model.update(condition, update, options);
-        return self.execTask(task, callback).nodeify(callback);
-    }
-
-    findOneAndUpdate(condition, update, options, callback) {
+    findOneAndUpdate(filter, update, options, callback) {
         this.method = 'findOneAndUpdate';
         var self = this;
-        if (!condition) {
-            Q.reject(self.paramError(condition)).nodeify(callback);
+        if (!filter) {
+            filter = {};
         }
-        if (!update) {
-            Q.reject(self.paramError(update)).nodeify(callback);
+        if (!filter.condition) {
+            filter.condition = filter;
         }
-        var task = self.model.findOneAndUpdate(condition, update, options);
+        if (!options) {
+            options = {};
+        }
+        var task = self.model.findOneAndUpdate(filter.condition, update, options);
         return self.execTask(task, callback).nodeify(callback);
     }
 
-    remove(condition, callback) {
+    remove(filter, options, callback) {
         this.method = 'remove';
         var self = this;
-        if (!condition) {
-            Q.reject(self.paramError(condition)).nodeify(callback);
+        if (!filter) {
+            filter = {};
         }
-        var task = self.model.remove(condition);
+        if (!filter.condition) {
+            filter.condition = filter;
+        }
+        if (!options) {
+            options = {};
+        }
+        var task = self.model.remove(filter.condition, options);
         return self.execTask(task, callback).nodeify(callback);
     }
 
     findByIdAndRemove(id, options, callback) {
         this.method = 'findByIdAndRemove';
         var self = this;
-        if (!id) {
-            Q.reject(self.paramError(id)).nodeify(callback);
-        }
         if (!options) {
-            options = {}
+            options = {};
         }
         var task = self.model.findByIdAndRemove(id, options);
+        return self.execTask(task, callback).nodeify(callback);
+    }
+
+    findOneAndRemove(filter, options, callback) {
+        this.method = 'findOneAndRemove';
+        var self = this;
+        if (!filter) {
+            filter = {};
+        }
+        if (!filter.condition) {
+            filter.condition = filter;
+        }
+        if (!options) {
+            options = {};
+        }
+        var task = self.model.findOneAndRemove(filter, options);
+        return self.execTask(task, callback).nodeify(callback);
+    }
+
+    aggregate(pipeline, options) {
+        this.method = 'findOneAndRemove';
+        var self = this;
+        if (!options) {
+            options = {};
+        }
+        var task = self.model.aggregate(pipeline, options);
         return self.execTask(task, callback).nodeify(callback);
     }
 }
