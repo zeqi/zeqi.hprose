@@ -336,7 +336,7 @@ class Base {
     }
 
     aggregate(pipeline, options) {
-        this.method = 'findOneAndRemove';
+        this.method = 'aggregate';
         var self = this;
         if (!options) {
             options = {};
