@@ -108,7 +108,7 @@ class CommonDao {
         }).nodeify(callback);
     }
 
-    save(doc, callback) {
+    save(domain, doc, callback) {
         this.method = 'save';
         var self = this;
         if (Array.isArray(doc)) {
@@ -116,8 +116,8 @@ class CommonDao {
         }
         var self = this;
         return Q.Promise(function (resolve, reject) {
-            var mod = new self.model(doc);
-            mod.save(function (err, data) {
+            var mode = new self.model(domain)(doc);
+            mode.save(function (err, data) {
                 if (err) {
                     error(self.method, '[error]', err);
                     return reject(err);

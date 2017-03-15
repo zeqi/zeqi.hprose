@@ -1,17 +1,18 @@
 {
   "DataProviders": {
-    "ChanQuanDataSource": {
-      "DriverType": "mongodb",
-      "dbname": "5116pai",
+    "ds_5116pai": {
+      "dsType": "mongodb",
       "host": "localhost",
-      "port": "27017",
+      "port": 27017,
+      "db": "5116pai",
       "user": "",
       "password": ""
     },
-    "RedisDataSource": {
-      "DriverType": "redis",
+    "5116pai_ds_redis": {
+      "dsType": "redis",
       "host": "localhost",
-      "port": "6379",
+      "port": 6279,
+      "db": 1,
       "user": "",
       "password": ""
     }
