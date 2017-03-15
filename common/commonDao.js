@@ -1,6 +1,6 @@
 /**
  * Operation database base module
- * @module dao-->base
+ * @module commonDao
  */
 
 'use strict'
@@ -13,8 +13,8 @@ var Q = require('q');
 //===============================
 //      Custom package
 //===============================
-var debug = require('debug')('zeqi.hprose');
-var error = debug('baseDao:error');
+var debug = require('debug')('zeqi.hprose:common:commonDao');
+var error = debug(':error');
 
 //===============================
 //      Logical start
@@ -45,9 +45,9 @@ class DaoError {
 }
 
 /**
- * Operation database base class
+ * Operation database common class
  */
-class Base {
+class CommonDao {
     constructor(model) {
         this.model = model;
         this.task = null;
@@ -346,6 +346,6 @@ class Base {
     }
 }
 
-module.exports = Base;
+module.exports = CommonDao;
 
 module.exports.DaoError = DaoError;

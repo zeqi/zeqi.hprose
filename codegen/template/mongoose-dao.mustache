@@ -11,8 +11,8 @@
 var Q = require('q');
 
 var debug = require('debug')('zeqi.hprose:dao:{{&moduleName}}');
-var BaseDao = require('../../common/baseDao');
-var DaoError = BaseDao.DaoError;
+var CommonDao = require('../../common/commonDao');
+var DaoError = CommonDao.DaoError;
 var Model = require('../models/{{&moduleName}}');
 var model = Model.model;
 var schema = Model.schema;
@@ -20,7 +20,7 @@ var schema = Model.schema;
 /**
 * Mongodb data access portal of function
 */
-class Dao extends BaseDao {
+class Dao extends CommonDao {
     /**
     * Dao Class constructor
     */
