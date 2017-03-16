@@ -76,6 +76,8 @@ module.exports = {
     //========================
     daoName: 'UserDao',
     dao_desc: 'According to the module definition, Create a module dao for the module ',
+    is_inherits_baseDao: false,
+    baseDao_path: '../../base/dao/user',
 
     //========================
     //  Interface info

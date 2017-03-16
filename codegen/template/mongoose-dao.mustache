@@ -1,7 +1,7 @@
 /**
 * Persistence dao for {{&modelName}}
 * {{&dao_desc}}
-* @module dao-->{{&moduleName}}
+* @module {{&moduleName}}Dao
 * @auto-gen
 * Note: auto-gen code, NOT allowed to modify
 */
@@ -9,18 +9,23 @@
 'use strict'
 
 var Q = require('q');
+var debug = require('debug')('zeqi.hprose:persistence:dao:{{&moduleName}}');
 
-var debug = require('debug')('zeqi.hprose:dao:{{&moduleName}}');
-var CommonDao = require('../../common/commonDao');
-var DaoError = CommonDao.DaoError;
 var Model = require('../models/{{&moduleName}}');
 var model = Model.model;
-var schema = Model.schema;
+
+{{#is_inherits_baseDao}}
+var BaseDao = require('{{#baseDao_path}}{{&baseDao_path}}{{/baseDao_path}}{{^baseDao_path}}../../base/dao/{{&moduleName}}{{/baseDao_path}}');
+{{/is_inherits_baseDao}}
+{{^is_inherits_baseDao}}
+var BaseDao = require('../../common/commonDao');
+{{/is_inherits_baseDao}}
+var DaoError = BaseDao.DaoError;
 
 /**
 * Mongodb data access portal of function
 */
-class Dao extends CommonDao {
+class Dao extends BaseDao {
     /**
     * Dao Class constructor
     */
