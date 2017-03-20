@@ -26,6 +26,11 @@ module.exports = {
         description: 'User name',
         comma: true
     }, {
+        name: 'password',
+        type: 'String',
+        description: 'User password',
+        comma: true
+    }, {
         name: 'status',
         type: '{'
         + 'type: Number,'
@@ -42,6 +47,19 @@ module.exports = {
         description: 'Current user gender 0:未知,1:男.2:女',
         comma: true
     }, {
+        'name': 'tracking',
+        'type': '[{\n'
+        + 'optTime: {\n'
+        + 'type: Date,\n'
+        + 'default: Date.now\n'
+        + '}, //状态变更时间\n'
+        + 'action: {type: String, default: "login"}, //操作类型: login\n'
+        + 'ip: String  //登录地址\n'
+        + '}]',
+        'required': false,
+        'description': '批准状态变化跟踪',
+        comma: true
+    }, {
         name: 'createTime',
         type: '{'
         + 'type: Date,'
@@ -50,6 +68,28 @@ module.exports = {
         description: 'Current user create time',
         comma: false
     }],
+
+    //========================
+    //  Index info
+    //========================
+    index: [
+        {
+            'fields': '{mobile: 1}',
+            'options': '{unique: true}'
+        },
+        {
+            'fields': '{createTime: 1}',
+            'options': '{}'
+        },
+        {
+            'fields': '{mobile: 1, "tracking.ip": 1}',
+            'options': '{unique: true}'
+        }
+    ],
+
+    //========================
+    //  Schema extend
+    //========================
     schema_statics: [{
         name: 'findByName',
         conditionParams: [{

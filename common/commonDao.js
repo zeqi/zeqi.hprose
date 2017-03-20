@@ -14,7 +14,7 @@ var Q = require('q');
 //      Custom package
 //===============================
 var debug = require('debug')('zeqi.hprose:common:commonDao');
-var error = debug(':error');
+var error = debug('app:error');
 
 //===============================
 //      Logical start
@@ -79,7 +79,7 @@ class CommonDao {
     return Q.Promise(function (resolve, reject) {
       task.exec(function (err, result) {
         if (err) {
-          error(method, '[error]', err);
+          debug(method, '[error]', err);
           return reject(err);
         } else {
           debug(method, '[result]', result);
@@ -87,6 +87,16 @@ class CommonDao {
         }
       });
     }).nodeify(callback);
+  }
+
+  getDonmain(filter) {
+    if (!filter) {
+      filter = {};
+    }
+    if (!filter.domain) {
+      filter.domain = 'default';
+    }
+    return filter.domain;
   }
 
   create(docs, callback) {
@@ -108,17 +118,17 @@ class CommonDao {
     }).nodeify(callback);
   }
 
-  save(domain, doc, callback) {
+  save(filter, doc, callback) {
     this.method = 'save';
     var self = this;
     if (Array.isArray(doc)) {
       return this.create(doc, callback).nodeify(callback);
     }
     return Q.Promise(function (resolve, reject) {
-      var mode = new self.model(domain)(doc);
+      var mode = new self.model(self.getDonmain(filter))(doc);
       mode.save(function (err, data) {
         if (err) {
-          error(self.method, '[error]', err);
+          debug(self.method, '[error]', err);
           return reject(err);
         } else {
           debug(self.method, '[result]', data);
@@ -284,7 +294,7 @@ class CommonDao {
     if (!options) {
       options = {};
     }
-    var task = self.model.findOneAndUpdate(filter.condition, update, options);
+    var task = self.model(self.getDonmain(filter)).findOneAndUpdate(filter.condition, update, options);
     return self.execTask(task, callback).nodeify(callback);
   }
 

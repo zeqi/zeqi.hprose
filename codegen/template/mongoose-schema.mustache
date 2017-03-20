@@ -11,8 +11,12 @@ let common = require('zeqi.common');
 let DS = common.DS;
 let DS_NAME = '{{&dsName}}';
 let BASE_COLLECTION_NAME = '{{&collectionName}}';
+const ALREADY_SCHEMA = {};
 
 let getSchema = function (domain) {
+    if (ALREADY_SCHEMA[domain]) {
+        return ALREADY_SCHEMA[domain];
+    }
     var Schema = new mongoose.Schema({
 
         {{#schema}}
@@ -28,6 +32,13 @@ let getSchema = function (domain) {
         , { collection: domain + '.' + BASE_COLLECTION_NAME}
     {{/collectionName}}
     );
+
+    //================================
+    //       Index part 
+    //================================
+    {{#index}}
+        Schema.index({{&fields}}, {{&options}});
+    {{/index}}
 
     {{#schema_statics}}
     /**
@@ -51,6 +62,7 @@ let getSchema = function (domain) {
     }
     {{/schena_methods}}
 
+    ALREADY_SCHEMA[domain] = Schema;
     return Schema;
 }
 
