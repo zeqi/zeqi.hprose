@@ -6,12 +6,12 @@
 'use strict';
 
 //===============================
-//      Third party package
+//      Third party module
 //===============================
 var Q = require('q');
 
 //===============================
-//      Custom package
+//      Custom module
 //===============================
 var debug = require('debug')('zeqi.hprose:common:commonDao');
 var error = debug('app:error');
@@ -314,13 +314,16 @@ class CommonDao {
     return self.execTask(task, callback).nodeify(callback);
   }
 
-  findByIdAndRemove(id, options, callback) {
+  findByIdAndRemove(filter, id, options, callback) {
     this.method = 'findByIdAndRemove';
     var self = this;
+    if (!filter) {
+      filter = {};
+    }
     if (!options) {
       options = {};
     }
-    var task = self.model.findByIdAndRemove(id, options);
+    var task = self.model(self.getDonmain(filter)).findByIdAndRemove(id, options);
     return self.execTask(task, callback).nodeify(callback);
   }
 
@@ -340,13 +343,16 @@ class CommonDao {
     return self.execTask(task, callback).nodeify(callback);
   }
 
-  aggregate(pipeline, options) {
+  aggregate(filter, pipeline, options) {
     this.method = 'aggregate';
     var self = this;
+    if (!filter) {
+      filter = {};
+    }
     if (!options) {
       options = {};
     }
-    var task = self.model.aggregate(pipeline, options);
+    var task = self.model(self.getDonmain(filter)).aggregate(pipeline, options);
     return self.execTask(task, callback).nodeify(callback);
   }
 }
