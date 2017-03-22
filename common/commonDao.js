@@ -99,14 +99,14 @@ class CommonDao {
     return filter.domain;
   }
 
-  create(docs, callback) {
+  create(filter, docs, callback) {
     this.method = 'create';
     var self = this;
     if (!Array.isArray(docs)) {
       docs = [docs];
     }
     return Q.Promise(function (resolve, reject) {
-      self.model.create(docs, function (err, data) {
+      self.model(self.getDonmain(filter)).create(docs, function (err, data) {
         if (err) {
           error(self.method, '[error]', err);
           return reject(err);
