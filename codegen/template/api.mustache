@@ -1,22 +1,26 @@
 /**
 * Created by zeqi
-* @module api-->{{&moduleName}}
+* @module {{&moduleName}}Api
 * @auto-gen
 * Note: auto-gen code, NOT allowed to modify
 */
 
 'use strict'
 
-var BaseApi = require('../base');
-var business = require('../../business/{{&moduleName}}');
+var Q = require('q');
+var debug = require('debug')('zeqi.hprose:persistence:dao:{{&moduleName}}');
 
-var normalize = require('../../utils/normalize');
-var res = require('../../utils/res');
-var resCode = require('../../define/resCode');
+{{#is_inherits_baseApi}}
+var BaseApi = require('{{#baseApi_path}}{{&baseApi_path}}{{/baseApi_path}}{{^baseApi_path}}../../base/dao/{{&moduleName}}{{/baseApi_path}}');
+{{/is_inherits_baseApi}}
+{{^is_inherits_baseApi}}
+var BaseApi = require('../../common/commonApi');
+{{/is_inherits_baseApi}}
+var dao = require('../dao/{{&moduleName}}');
 
 class Api extends BaseApi {
-    constructor() {
-        super(business,normalize,res,resCode);
+    constructor(dao) {
+        super(dao);
     }
 
     {{#schema_statics}}
@@ -44,4 +48,4 @@ class Api extends BaseApi {
     {{/schena_methods}}
 }
 
-module.exports = new Api();
+module.exports = new Api(dao);

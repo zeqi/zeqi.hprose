@@ -8,13 +8,17 @@
 //===============================
 //      Third party module
 //===============================
-var Q = require('q');
+let Q = require('q');
 
 //===============================
 //      Custom module
 //===============================
-var debug = require('debug')('zeqi.hprose:common:commonDao');
-var error = debug('app:error');
+let debug = require('debug');
+let log = debug('zeqi.hprose:common:commonDao:log');
+let error = debug('zeqi.hprose:common:commonDao:error');
+error.log = console.error.bind(console);
+
+let EventEmitter = require('events');
 
 //===============================
 //      Logical start
@@ -47,12 +51,12 @@ class DaoError {
 /**
  * Operation database common class
  */
-class CommonDao {
+class CommonDao extends EventEmitter {
   constructor(model) {
+    super();
     this.model = model;
     this.task = null;
     this.method = '';
-    this.customPageSize = 10;
   }
 
   /**
@@ -79,11 +83,12 @@ class CommonDao {
     return Q.Promise(function (resolve, reject) {
       task.exec(function (err, result) {
         if (err) {
-          debug(method, '[error]', err);
+          error(method, '[error]', err);
           return reject(err);
         } else {
-          debug(method, '[result]', result);
-          return resolve(result);
+          log(method, '[result]', result);
+          var data = result && result._doc
+          return resolve(data);
         }
       });
     }).nodeify(callback);
@@ -111,7 +116,7 @@ class CommonDao {
           error(self.method, '[error]', err);
           return reject(err);
         } else {
-          debug(self.method, '[result]', data);
+          log(self.method, '[result]', data);
           return resolve(data);
         }
       });
@@ -128,10 +133,10 @@ class CommonDao {
       var mode = new self.model(self.getDonmain(filter))(doc);
       mode.save(function (err, data) {
         if (err) {
-          debug(self.method, '[error]', err);
+          error(self.method, '[error]', err);
           return reject(err);
         } else {
-          debug(self.method, '[result]', data);
+          log(self.method, '[result]', data);
           return resolve(data);
         }
       });
@@ -153,7 +158,7 @@ class CommonDao {
     if (typeof options != 'object') {
       options = {};
     }
-    var task = self.model.find(filter.condition, options);
+    var task = self.model(self.getDonmain(filter)).find(filter.condition, options);
     if (filter.sort) {
       task.sort(filter.sort);
     }
@@ -175,7 +180,7 @@ class CommonDao {
     if (!filter.condition) {
       filter.condition = filter;
     }
-    var task = self.model.count(filter.condition);
+    var task = self.model(self.getDonmain(filter)).count(filter.condition);
     return task;
   }
 
@@ -233,7 +238,7 @@ class CommonDao {
     if (typeof options != 'object') {
       options = {};
     }
-    var task = self.model.findOne(filter.condition, options);
+    var task = self.model(self.getDonmain(filter)).findOne(filter.condition, options);
     if (filter.sort) {
       task.sort(filter.sort);
     }
@@ -255,7 +260,7 @@ class CommonDao {
   findById(id, options, callback) {
     this.method = 'findById';
     var self = this;
-    var task = self.model.findById(id, options);
+    var task = self.model(self.getDonmain(filter)).findById(id, options);
     return self.execTask(task, callback).nodeify(callback);
   }
 
@@ -271,14 +276,14 @@ class CommonDao {
     if (!options) {
       options = {};
     }
-    var task = self.model.update(filter.condition, update, options);
+    var task = self.model(self.getDonmain(filter)).update(filter.condition, update, options);
     return self.execTask(task, callback).nodeify(callback);
   }
 
   findByIdAndUpdate(id, update, options, callback) {
     this.method = 'findByIdAndUpdate';
     var self = this;
-    var task = self.model.findByIdAndUpdate(id, update, options);
+    var task = self.model(self.getDonmain(filter)).findByIdAndUpdate(id, update, options);
     return self.execTask(task, callback).nodeify(callback);
   }
 
@@ -310,7 +315,7 @@ class CommonDao {
     if (!options) {
       options = {};
     }
-    var task = self.model.remove(filter.condition, options);
+    var task = self.model(self.getDonmain(filter)).remove(filter.condition, options);
     return self.execTask(task, callback).nodeify(callback);
   }
 
@@ -339,7 +344,7 @@ class CommonDao {
     if (!options) {
       options = {};
     }
-    var task = self.model.findOneAndRemove(filter, options);
+    var task = self.model(self.getDonmain(filter)).findOneAndRemove(filter, options);
     return self.execTask(task, callback).nodeify(callback);
   }
 

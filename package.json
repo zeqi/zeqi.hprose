@@ -4,7 +4,11 @@
   "description": "hprose",
   "main": "app.js",
   "scripts": {
-    "test": "npm test"
+    "test": "npm test",
+    "start:server:dev": "DEBUG=zeqi* NODE_ENV=development node --harmony app.js",
+    "start:client:dev": "DEBUG=zeqi* NODE_ENV=development node --harmony client.js",
+    "server": "npm run start:server:dev",
+    "start": "npm run start:client:dev"
   },
   "keywords": [
     "hprose",

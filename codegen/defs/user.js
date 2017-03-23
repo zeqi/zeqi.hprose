@@ -119,6 +119,9 @@ module.exports = {
     is_inherits_baseDao: false,
     baseDao_path: '../../base/dao/user',
 
+    is_inherits_baseApi: true,
+    baseApi_path: '../../base/api/user',
+
     //========================
     //  Interface info
     //========================

@@ -18,7 +18,6 @@ var template = {
   business: './codegen/template/business.mustache',
   api: './codegen/template/api.mustache',
   inter: './codegen/template/interface.mustache',
-  proto: './codegen/template/proto.mustache'
 }
 
 gulp.task('clear', function () {
@@ -38,16 +37,16 @@ gulp.task('dao', function () {
     .pipe(gulp.dest('persistence/dao/'));
 });
 
-gulp.task('business', function () {
+/*gulp.task('business', function () {
   return gulp.src(option.definition)
     .pipe(generator({ template: template.business }))
     .pipe(gulp.dest('persistence/business/gen/'));
-});
+});*/
 
 gulp.task('api', function () {
   return gulp.src(option.definition)
     .pipe(generator({ template: template.api }))
-    .pipe(gulp.dest('persistence/api/gen/'));
+    .pipe(gulp.dest('persistence/api/'));
 });
 
 /*gulp.task('inter', function () {
@@ -83,4 +82,4 @@ gulp.task('api', function () {
     }));
 });*/
 
-gulp.task('default', ['clear', 'model', 'dao']);
+gulp.task('default', ['clear', 'model', 'dao', 'api']);
